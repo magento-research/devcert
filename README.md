@@ -1,5 +1,12 @@
 # devcert - Development SSL made easy
 
+**Fork of https://github.com/davewasmer/devcert/ with the following change:**
+
+_A full root certificate is generated and authorized each time for security,
+deleting the private keybefore returning the signed key and certificate which
+should then be cached by the application.
+If the certificate is invalidated, a new full generation process can be run._
+
 So, running a local HTTPS server usually sucks. There's a range of approaches,
 each with their own tradeoff. The common one, using self-signed certificates,
 means having to ignore scary browser warnings for each project.
@@ -18,36 +25,20 @@ app.get('/', function (req, res) {
   res.send('Hello Secure World!');
 });
 
-getDevelopmentCertificate('localhost', { installCertutil: true }).then((ssl) => {
+getDevelopmentCertificate('myapp').then((ssl) => {
   https.createServer(ssl, app).listen(3000);
 });
 ```
 
-Now open https://localhost:3000 and voila - your page loads with no scary
-warnings or hoops to jump through.
+Now open https://myapp:3000 (assuming host configuration, or otherwise https://localhost:3000) and voila
+- your page loads with no scary warnings or hoops to jump through.
 
-> Certificates are cached by name, so two calls for
-`getDevelopmentCertificate('foo')` will return the same key and certificate. The
-first argument to `getDevelopmentCertificate` is used as the common name so that
-the certificate can be accessed by `https://foo` as well as `https://localhost`.
-
-### installCertutil option
-
- devcert currently takes a single option: `installCertutil`. If true, devcert
- will attempt to install some software necessary to tell Firefox (and Chrome,
- only on Linux) to trust your development certificates. This is not required,
- but without it, you'll need to tell Firefox to trust these certificates
- manually.
+### Certificate Installation
 
 Thankully, Firefox makes this easy. There's a point-and-click wizard for
-importing and trusting a certificate, so if you don't provide `installCertutil:
-true` to devcert, devcert will instead automatically open Firefox and kick off
-this wizard for you. Simply follow the prompts to trust the certificate.
-**Reminder: you'll only need to do this once per machine**
-
-**Note:** Chrome on Linux **requires** `installCertutil: true`, or else you'll
-face the scary browser warnings every time. Unfortunately, there's no way to
-tell Chrome on Linux to trust a certificate without install certutil.
+importing and trusting a certificate - devcert will instead automatically
+open Firefox and kick off this wizard for you. Simply follow the prompts to
+trust the certificate.
 
 The software installed varies by OS:
 

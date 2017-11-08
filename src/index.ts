@@ -1,81 +1,24 @@
-import {
-  readFileSync,
-  existsSync
-} from 'fs';
-import * as createDebug from 'debug';
-import { sync as commandExists } from 'command-exists';
+import commandExists = require('command-exists');
+import installAuthority from './install-authority';
+import { generateOpensslConf, generateRootCertificate, generateSignedCertificate, tmpClear } from './openssl';
+import fs = require('fs');
 
-import {
-  isMac,
-  isLinux,
-  isWindows,
-  configPath,
-  opensslConfPath,
-  rootKeyPath,
-  rootCertPath,
-  caCertsDir
-} from './constants';
-import installCertificateAuthority from './root-authority';
-import { openssl, generateKey } from './utils';
-
-const debug = createDebug('devcert');
-
-/**
- * Request an SSL certificate for the given app name signed by the devcert root certificate
- * authority. If devcert has previously generated a certificate for that app name on this machine,
- * it will reuse that certificate.
- *
- * If this is the first time devcert is being run on this machine, it will generate and attempt to
- * install a root certificate authority.
- *
- * Returns a promise that resolves with { keyPath, certPath, key, cert }, where `key` and `cert` are
- * Buffers with the contents of `keyPath` and `certPath`, respectively.
- */
-export default async function devcert(commonName: string, options: { installCertutil?: boolean } = {}) {
-  debug(`development cert requested for ${ commonName }`);
-
-  if (!isMac && !isLinux && !isWindows) {
-    throw new Error(`devcert: "${ process.platform }" platform not supported`);
-  }
-
-  if (!commandExists('openssl')) {
+export default async function generateDevCert (commonName: string) {
+  if (!commandExists.sync('openssl'))
     throw new Error('Unable to find openssl - make sure it is installed and available in your PATH');
-  }
-  if (commonName.length > 64 || commonName.indexOf('/') !== -1) {
+  if (!commonName.match(/^[.\.]{1, 64}$/))
     throw new Error(`Invalid Common Name ${commonName}.`);
+  try {
+    const opensslConfPath = generateOpensslConf(commonName);
+    const { rootKeyPath, rootCertPath } = await generateRootCertificate(commonName, opensslConfPath);
+    await installAuthority(commonName, rootCertPath);
+    const { keyPath, certPath } = generateSignedCertificate(name, opensslConfPath, rootKeyPath, rootCertPath);
+    const key = fs.readFileSync(keyPath).toString();
+    const cert = fs.readFileSync(certPath).toString();
+    return { key, cert };  
   }
-
-  let appKeyPath = configPath(`${ commonName }.key`);
-  let appCertPath = configPath(`${ commonName }.crt`);
-
-  if (!existsSync(rootCertPath)) {
-    debug('devcert root CA not installed yet, must be first run; installing root CA ...');
-    await installCertificateAuthority(options.installCertutil);
+  finally {
+    // clear all tmp files (including root cert!)
+    tmpClear();
   }
-
-  if (!existsSync(configPath(`${ commonName }.crt`))) {
-    debug(`first request for ${ commonName } cert, generating and caching ...`);
-    generateKey(configPath(`${ commonName }.key`));
-    generateSignedCertificate(commonName, appKeyPath);
-  }
-
-  debug(`returning app cert`);
-  return {
-    keyPath: appKeyPath,
-    certPath: appCertPath,
-    key: readFileSync(appKeyPath),
-    cert: readFileSync(appCertPath)
-  };
-
-}
-
-// Generate an app certificate signed by the devcert root CA
-function generateSignedCertificate(name: string, keyPath: string): void {
-  process.env.SAN = name;
-  debug(`generating certificate signing request for ${ name }`);
-  let csrFile = configPath(`${ name }.csr`)
-  openssl(`req -config ${ opensslConfPath } -subj "/CN=${ name }" -key ${ keyPath } -out ${ csrFile } -new`);
-  debug(`generating certificate for ${ name } from signing request; signing with devcert root CA`);
-  let certPath = configPath(`${ name }.crt`);
-  openssl(`ca -config ${ opensslConfPath } -in ${ csrFile } -out ${ certPath } -outdir ${ caCertsDir } -keyfile ${ rootKeyPath } -cert ${ rootCertPath } -notext -md sha256 -days 7000 -batch -extensions server_cert`)
 }
