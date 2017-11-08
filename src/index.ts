@@ -41,6 +41,9 @@ export default async function devcert(commonName: string, options: { installCert
   if (!commandExists('openssl')) {
     throw new Error('Unable to find openssl - make sure it is installed and available in your PATH');
   }
+  if (commonName.length > 64 || commonName.indexOf('/') !== -1) {
+    throw new Error(`Invalid Common Name ${commonName}.`);
+  }
 
   let appKeyPath = configPath(`${ commonName }.key`);
   let appCertPath = configPath(`${ commonName }.crt`);
