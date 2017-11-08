@@ -1,5 +1,5 @@
 import { chmodSync } from 'fs';
-import { exec, execSync, ExecSyncOptions } from 'child_process';
+import { execSync, ExecSyncOptions } from 'child_process';
 import * as createDebug from 'debug';
 import * as path from 'path';
 

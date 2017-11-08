@@ -1,16 +1,7 @@
 import {
   readFileSync,
-  readdirSync,
-  writeFileSync,
-  unlinkSync,
-  chmodSync,
   existsSync
 } from 'fs';
-import * as path from 'path';
-import { exec, execSync, ExecSyncOptions } from 'child_process';
-import * as tmp from 'tmp';
-import * as Configstore from 'configstore';
-import * as mkdirp from 'mkdirp';
 import * as createDebug from 'debug';
 import { sync as commandExists } from 'command-exists';
 
@@ -18,9 +9,7 @@ import {
   isMac,
   isLinux,
   isWindows,
-  configDir,
   configPath,
-  opensslConfTemplate,
   opensslConfPath,
   rootKeyPath,
   rootCertPath,

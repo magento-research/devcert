@@ -1,18 +1,17 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
-      "declaration": true,
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "target": "ES2016",
-      "noImplicitAny": true,
-      "sourceMap": false,
-      "importHelpers": true,
-      "inlineSourceMap": true,
-      "inlineSources": true,
-      "outDir": "dist",
-      "baseUrl": ".",
-      "skipLibCheck": true,
-      "sourceRoot": "."
-  }
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "typeRoots": ["node_modules/@types"],
+    "module": "commonjs",
+    "target": "esnext",
+    "noImplicitAny": false,
+    "sourceMap": true,
+    "outDir": "lib",
+    "declaration": true
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/api.js"
+  ]
 }

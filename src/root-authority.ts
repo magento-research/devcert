@@ -11,7 +11,6 @@ import * as eol from 'eol';
 import {
   isMac,
   isLinux,
-  isWindows,
   configPath,
   rootKeyPath,
   rootCertPath,
@@ -174,7 +173,7 @@ async function addCertificateToNSSCertDB(nssDirGlob: string, options: { installC
 async function openCertificateInFirefox(firefoxPath: string): Promise<void> {
   debug('adding devert to firefox manually - launch webserver for certificate hosting');
   let port = await getPort();
-  let server = http.createServer((req, res) => {
+  http.createServer((_req, res) => {
     res.writeHead(200, { 'Content-type': 'application/x-x509-ca-cert' });
     res.write(readFileSync(rootCertPath));
     res.end();
@@ -193,7 +192,6 @@ function lookupOrInstallCertutil(installCertutil: boolean): boolean | string {
   if (isMac) {
     debug('on mac, looking for homebrew (the only method to install nss that is currently supported by devcert');
     if (commandExists('brew')) {
-      let nssPath: string;
       let certutilPath: string;
       try {
         certutilPath = path.join(run('brew --prefix nss').toString().trim(), 'bin', 'certutil');
