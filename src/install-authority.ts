@@ -93,7 +93,7 @@ async function addCertificateToNSSCertDB (commonName: string, rootCertPath: stri
   if (checkForOpenFirefox) {
     let runningProcesses = execSync('ps aux');
     if (runningProcesses.indexOf('firefox') > -1) {
-      console.log('Please close Firefox before continuing (Press <Enter> when ready)');
+      console.log('Please close Firefox (Press <Enter> when ready)');
       await waitForUser();
     }
   }
@@ -118,9 +118,7 @@ async function openCertificateInFirefox(rootCertPath: string, firefoxPath: strin
     res.write(readFileSync(rootCertPath));
     res.end();
   }).listen(port);
-  console.log(`Unable to automatically install SSL certificate - please follow the prompts at http://localhost:${port} in Firefox to trust the root certificate`);
-  console.log('See https://github.com/davewasmer/devcert#how-it-works for more details');
-  console.log('-- Press <Enter> once you finish the Firefox prompts --');
+  console.log('Confirm the prompt for http://localhost:${port} in Firefox (Press <Enter> when confirmed)');
   exec(`${firefoxPath} http://localhost:${port}`);
   await waitForUser();
 }
