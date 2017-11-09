@@ -9,7 +9,7 @@ import mkdirp = require('mkdirp');
 let tmpPrefix, tmpFiles;
 export function tmpFile (name: string) {
   if (!tmpPrefix) {
-    tmpPrefix = path.join(os.tmpdir(), Math.round(Math.random() * 36 ** 10).toString(64));
+    tmpPrefix = path.join(os.tmpdir(), Math.round(Math.random() * 36 ** 10).toString(36));
     tmpFiles = [];
   }
   const tmpFile = tmpPrefix + name;
@@ -17,14 +17,18 @@ export function tmpFile (name: string) {
   let uniqueIndex = 0;
   while (tmpFiles.indexOf(tmpFileUnique) !== -1)
     tmpFileUnique = tmpFile + (++uniqueIndex);
-  tmpFiles.push(tmpFile);
-  return tmpPrefix + name;
+  tmpFiles.push(tmpFileUnique);
+  return tmpFileUnique;
 }
 
 export function tmpClear () {
   if (tmpFiles) {
-    for (let tmpFile of tmpFiles)
-      fs.unlinkSync(tmpFile);
+    for (let tmpFile of tmpFiles) {
+      try {
+        fs.unlinkSync(tmpFile);
+      }
+      catch (_e) {}
+    }
   }
 }
 
@@ -32,7 +36,8 @@ let rndFile;
 function openssl (cmd: string) {
   if (!rndFile)
     rndFile = tmpFile('rnd');
-  return childProcess.execSync(`openssl ${ cmd }`, {
+  childProcess.execSync(`openssl ${ cmd }`, {
+    stdio: 'ignore',
     env: Object.assign({
       RANDFILE: rndFile
     }, process.env)
@@ -127,7 +132,8 @@ export function generateOpensslConf (commonName: string) {
 
 export function generateKey (): string {
   const keyFile = tmpFile('key');
-  openssl(`genrsa 2048 -out ${keyFile}`);
+  openssl(`genrsa -out ${keyFile} 2048`);
+  fs.chmodSync(keyFile, 400);
   return keyFile;
 }
 
@@ -146,7 +152,7 @@ export function generateSignedCertificate (commonName: string, opensslConfPath: 
   const certPath = tmpFile(`${commonName}.crt`);
   
   // needed but not used (see https://www.mail-archive.com/openssl-users@openssl.org/msg81098.html)
-  const caCertsDir = path.join(os.tmpdir(), Math.round(Math.random() * 36 ** 10).toString(64));
+  const caCertsDir = path.join(os.tmpdir(), Math.round(Math.random() * 36 ** 10).toString(36));
   mkdirp.sync(caCertsDir);
 
   openssl(`ca -config ${opensslConfPath} -in ${csrFile} -out ${certPath} -outdir ${caCertsDir} -keyfile ${rootKeyPath} -cert ${rootCertPath} -notext -md sha256 -days 7000 -batch -extensions server_cert`)
