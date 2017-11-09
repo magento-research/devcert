@@ -56,7 +56,6 @@ function normalizeLinebreaks (str) {
   return str.replace(newline, linebreak);
 }
 
-
 const opensslConfTemplate = ({ commonName, databasePath, serialPath }: OpensslTemplateOpts) => `[ ca ]
 # \`man ca\`
 default_ca = CA_default
@@ -126,7 +125,7 @@ export function generateOpensslConf (commonName: string) {
   const opensslConf = opensslConfTemplate({ commonName, databasePath, serialPath });
   fs.writeFileSync(opensslConfPath, normalizeLinebreaks(opensslConf));
   fs.writeFileSync(databasePath, '');
-  fs.writeFileSync(serialPath, '01');
+  fs.writeFileSync(serialPath, Math.round(Math.random() * 16 ** 10).toString(16));
   return opensslConfPath;
 }
 

@@ -76,7 +76,10 @@ async function addToLinuxTrustStores (commonName: string, rootCertPath: string):
 // even try it - we just bail out to the GUI.
 async function addToWindowsTrustStores (rootCertPath: string): Promise<void> {
   // IE, Chrome, system utils
-  execSync(`certutil -addstore -user root ${rootCertPath}`);
+  try {
+    execSync(`certutil -addstore -user root ${rootCertPath}`);
+  }
+  catch (e) {}
   // Firefox (don't even try NSS certutil, no easy install for Windows)
   await openCertificateInFirefox(rootCertPath, 'start firefox');
 }
