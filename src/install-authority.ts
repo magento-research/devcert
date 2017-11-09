@@ -121,7 +121,7 @@ async function openCertificateInFirefox(rootCertPath: string, firefoxPath: strin
     res.write(readFileSync(rootCertPath));
     res.end();
   }).listen(port);
-  console.log('Confirm the prompt for http://localhost:${port} in Firefox (Press <Enter> when confirmed)');
+  console.log('Tick the "Trust this CA to identify websites" option in Firefox from the page at http://localhost:${port} (Press <Enter> when confirmed)');
   exec(`${firefoxPath} http://localhost:${port}`);
   await waitForUser();
 }
