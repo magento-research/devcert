@@ -96,7 +96,7 @@ async function addCertificateToNSSCertDB (commonName: string, rootCertPath: stri
   if (checkForOpenFirefox) {
     let runningProcesses = execSync('ps aux');
     if (runningProcesses.indexOf('firefox') > -1) {
-      console.log('Please close Firefox (Press <Enter> when ready)');
+      console.log('Please close Firefox\nPress <Enter> when ready');
       await waitForUser();
     }
   }
@@ -121,8 +121,10 @@ async function openCertificateInFirefox(rootCertPath: string, firefoxPath: strin
     res.write(readFileSync(rootCertPath));
     res.end();
   }).listen(port);
-  console.log('Tick the "Trust this CA to identify websites" option in Firefox from the page at http://localhost:${port} (Press <Enter> when confirmed)');
+  console.log(`A Firefox window will be opened for authorization. You will need to tick the "Trust this CA to identify websites" option and then confirm.\nPress <Enter> to continue`);
+  await waitForUser();
   exec(`${firefoxPath} http://localhost:${port}`);
+  console.log(`Press <Enter> once confirmed`);
   await waitForUser();
 }
 
