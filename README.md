@@ -56,23 +56,20 @@ The software installed varies by OS:
 
 ## How it works
 
-When you ask for a development certificate, devcert will first check to see if
-it has run on this machine before. If not, it will create a root certificate
+When you ask for a development certificate, devcert  will create a root certificate
 authority and add it to your OS and various browser trust stores. You'll likely
 see password prompts from your OS at this point to authorize the new root CA.
-This is the only time you'll see these prompts.
 
-This root certificate authority allows devcert to create a new SSL certificate
-whenever you want without needing to ask for elevated permissions again. It also
-ensures that browsers won't show scary warnings about untrusted certificates,
-since your OS and browsers will now trust devcert's certificates. The root CA
+devcert-sanscache then uses this root certificate to authorize a new SSL certificate,
+before deleting the private key for the root certificate.
+This ensures that browsers won't show scary warnings about untrusted certificates,
+since your OS and browsers will now trust devcert's certificate. The root CA
 certificate is unique to your machine only, and is generated on-the-fly when it
-is first installed.
+is first installed. No other certificates can be generated from this root CA
+once the private key has been deleted.
 
-Once devcert is sure that it has a root certificate authority installed, it will
-create a new SSL certificate & key pair for your app, signed by this root
-certificate authority. Since your browser & OS now trust the root authority,
-they'll trust the certificate for your app - no more scary warnings!
+Since your browser & OS now trust the root authority, they'll trust the certificate
+for your app - no more scary warnings!
 
 ## License
 
