@@ -12,10 +12,11 @@ export default async function generateDevCert (commonName: string) {
     const opensslConfPath = generateOpensslConf(commonName);
     const { rootKeyPath, rootCertPath } = await generateRootCertificate(commonName, opensslConfPath);
     await installAuthority(commonName, rootCertPath);
-    const { keyPath, certPath } = generateSignedCertificate(commonName, opensslConfPath, rootKeyPath, rootCertPath);
+    const { keyPath, certPath, caPath } = generateSignedCertificate(commonName, opensslConfPath, rootKeyPath, rootCertPath);
     const key = fs.readFileSync(keyPath).toString();
     const cert = fs.readFileSync(certPath).toString();
-    return { key, cert };  
+    const ca = fs.readFileSync(caPath).toString();
+    return { key, cert, ca };
   }
   finally {
     // clear all tmp files (including root cert!)

@@ -143,7 +143,7 @@ export function generateRootCertificate (commonName: string, opensslConfPath: st
   return { rootKeyPath, rootCertPath };
 }
 
-export function generateSignedCertificate (commonName: string, opensslConfPath: string, rootKeyPath: string, rootCertPath: string) {
+export function generateSignedCertificate (commonName: string, opensslConfPath: string, rootKeyPath: string, caPath: string) {
   const keyPath = generateKey();
   process.env.SAN = commonName;
   const csrFile = tmpFile(`${commonName}.csr`);
@@ -154,9 +154,9 @@ export function generateSignedCertificate (commonName: string, opensslConfPath: 
   const caCertsDir = path.join(os.tmpdir(), Math.round(Math.random() * 36 ** 10).toString(36));
   mkdirp.sync(caCertsDir);
 
-  openssl(`ca -config ${opensslConfPath} -in ${csrFile} -out ${certPath} -outdir ${caCertsDir} -keyfile ${rootKeyPath} -cert ${rootCertPath} -notext -md sha256 -days 7000 -batch -extensions server_cert`)
+  openssl(`ca -config ${opensslConfPath} -in ${csrFile} -out ${certPath} -outdir ${caCertsDir} -keyfile ${rootKeyPath} -cert ${caPath} -notext -md sha256 -days 7000 -batch -extensions server_cert`)
 
   rimraf.sync(caCertsDir);
 
-  return { keyPath, certPath };
+  return { keyPath, certPath, caPath };
 }
