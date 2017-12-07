@@ -8,8 +8,12 @@ import glob = require('glob');
 
 export function waitForUser () {
   return new Promise((resolve) => {
+    function waitHandler () {
+      resolve();
+      process.stdin.removeListener('data', waitHandler);
+    }
     process.stdin.resume();
-    process.stdin.on('data', resolve);
+    process.stdin.on('data', waitHandler);
   });
 }
 
@@ -121,10 +125,10 @@ async function openCertificateInFirefox(rootCertPath: string, firefoxPath: strin
     res.write(readFileSync(rootCertPath));
     res.end();
   }).listen(port);
-  console.log(`A Firefox window will be opened for authorization. You will need to tick the "Trust this CA to identify websites" option and then confirm.\nPress <Enter> to continue`);
+  console.log(`If using Firefox, a Firefox window will be opened for authorization.\nTick the "Trust this CA to identify websites" option and then confirm.\nPress <Enter> to continue.`);
   await waitForUser();
   exec(`${firefoxPath} http://localhost:${port}`);
-  console.log(`Press <Enter> once confirmed`);
+  console.log(`Press <Enter> once confirmed (or to skip)`);
   await waitForUser();
 }
 
