@@ -4,7 +4,7 @@
     "noUnusedLocals": true,
     "typeRoots": ["node_modules/@types"],
     "module": "commonjs",
-    "target": "esnext",
+    "target": "ES2017",
     "noImplicitAny": false,
     "sourceMap": true,
     "outDir": "lib",

@@ -1,5 +1,5 @@
-import util = require('util');
 import fs = require('fs');
+import util = require('util');
 export const readFile = util.promisify(fs.readFile);
 export const writeFile = util.promisify(fs.writeFile);
 export const unlink = util.promisify(fs.unlink);
