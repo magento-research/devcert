@@ -13,7 +13,7 @@
     "test:dev": "jest -i src/**/*",
     "precompile": "npm run -s test:dev",
     "compile": "tsc",
-    "prepublishOnly": "compile"
+    "prepublishOnly": "npm run compile"
   },
   "repository": {
     "type": "git",
