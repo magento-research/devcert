@@ -98,15 +98,15 @@ async function addToLinuxTrustStores(
         );
     } catch (e) {
         // Otherwise, open the cert in Firefox to install it
-        await openCertificateInFirefox(rootCertPath, 'firefox');
+        // await openCertificateInFirefox(rootCertPath, 'firefox');
     }
     // Chrome
-    await addCertificateToNSSCertDB(
-        commonName,
-        rootCertPath,
-        path.join(process.env.HOME, '.pki/nssdb'),
-        false
-    );
+    // await addCertificateToNSSCertDB(
+    //     commonName,
+    //     rootCertPath,
+    //     path.join(process.env.HOME, '.pki/nssdb'),
+    //     false
+    // );
 }
 
 // Windows is at least simple. Like macOS, most applications will delegate to the system trust
